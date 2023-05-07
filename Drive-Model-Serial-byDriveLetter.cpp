@@ -10,7 +10,7 @@
 #include <comdef.h>
 #include <Wbemidl.h>
 #include <regex>
-
+#include <cwctype>
 
 #pragma comment(lib, "wbemuuid.lib")
 
@@ -55,8 +55,44 @@ bool GetModelAndSerialForDrive(const std::vector<Drive>& drives, const std::wstr
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+    std::wstring wideArgument;
+    if (argc < 2)
+    {
+        std::wcout << L"No argument mentioned. You must provide drive letter as argument" <<  std::endl;
+        return 0;
+    }
+    else if (argc > 2)
+    {
+        //drive letter without ":"
+        std::wcout << L"Usage: " << argv[0] << L" <driveletter>" << std::endl;
+        return 1;
+    }
+    else {               
+        
+        // you can only use std::wstring wideArg(argv[1]);
+        // if you use wmain(int argc, wchar_t* argv[]) instead
+
+        //transform char* into std:wstring
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, argv[1], -1, NULL, 0);
+        wchar_t* wideString = new wchar_t[size_needed];
+        MultiByteToWideChar(CP_UTF8, 0, argv[1], -1, wideString, size_needed);
+        std::wstring wideArg(wideString);
+
+        //check if argumetn is made of one character 
+        if (wideArg.size() == 1 && std::iswalpha(wideArg[0]))
+        {            
+            wideArgument = wideArg;
+            
+        }
+        else
+        {
+            std::wcout << L"Wrong argument" << std::endl;
+            return 1;
+        }
+    }
+
     CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr);
 
@@ -170,7 +206,11 @@ int main()
         }
     }
 
-    std::wstring driveLetter = L"C:";
+    //to upper
+    std::transform(wideArgument.begin(), wideArgument.end(), wideArgument.begin(), std::towupper);
+    
+    std::wstring driveLetter = wideArgument;
+    driveLetter.append(L":");
     std::wstring model, serial;
     if (GetModelAndSerialForDrive(drives, driveLetter, model, serial))
     {
