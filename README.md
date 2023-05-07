@@ -21,5 +21,14 @@ If you want a standalone executable
 - go to Project > Properties > Configuration Properties > C/C++ >Code Generation
 - Change Runtime Library into Multi-Htreaded (instead of Mutli-Threaded DLL)
 
+
+### Usage
+programname.exe \<driverletter\>
+
+### Debugging
+To set the driverletter when debuggin, in VS 2022:
+- right click on project name > Properties > Configuration Properties > Debugging
+- set Command Arguments to the driverletter (for example C)
+
 ## Development
 Want to contribute? Great!
